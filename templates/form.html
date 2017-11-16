@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+{% for size in range(4, 7) %}
+{% include "form_itself.html" with context %}
+{% endfor %}
+{% endblock content %}

@@ -1,0 +1,16 @@
+<form action="{{ url_for('analyze') }}" method="GET">
+  <input type="hidden" name="size" value="{{ size }}">
+  <table border="1">
+    {% for i in range(size) %}
+    <tr border="1">
+      {% for j in range(size) %}
+      <td border="1">
+        <input name="name_{{ i }}_{{ j }}" placeholder="id" value="{{ solver.names[i][j] }}">
+        <input name="direction_{{ i }}_{{ j }}" placeholder="direction" pattern="[UD]?[LR]?" value="{{ solver.directions[i][j] }}">
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  <input type="submit">
+</form>

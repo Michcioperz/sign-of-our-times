@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<table border="1">
+  {% for line in solver.names %}
+  <tr>
+    {% for item in line %}
+    <td>{{ item }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% with size=solver.size %}
+{% include "form_itself.html" with context %}
+{% endwith %}
+{{ svg | safe }}
+{% endblock content %}

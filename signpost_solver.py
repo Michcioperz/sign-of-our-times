@@ -2,7 +2,49 @@
 import string, functools
 from graphviz import Digraph
 
+class TathamSavefile(list):
+    def one_by_key(self, key):
+        values = self.multiple_by_key(key)
+        if len(values) > 1:
+            print("warning: trimming one_by_key")
+        return values[0]
+    def multiple_by_key(self, key):
+        return [value for (k, value) in self if k == key]
+    def __init__(self, content):
+        """Loads savefile from Tatham's puzzles as a list of key-value tuples"""
+        for line in content.strip().split('\n'):
+            key, length, value = line.strip().split(':', 2)
+            if len(value) != int(length):
+                print("warning: mismatched length and len(value) in line: {!r}".format(line))
+            self.append((key.strip(), value))
+
+
 class Signpost(object):
+    savefile_directions = {
+            'a': 'U',
+            'b': 'UR',
+            'c':  'R',
+            'd': 'DR',
+            'e': 'D',
+            'f': 'DL',
+            'g':  'L',
+            'h': 'UL',
+            }
+    @classmethod
+    def from_savefile(cls_, savefile_content):
+        config = TathamSavefile(savefile_content)
+        size = [int(a) for a in config.one_by_key("PARAMS").rstrip('c').split('x')]
+        puzzle_desc = config.one_by_key("DESC")
+        names_unsplit = ''.join([" " if char in string.ascii_letters else char for char in puzzle_desc]).split(' ')[:-1]
+        last_index = names_unsplit.index(str(size[0] * size[1]))
+        assert(len(names_unsplit) == size[0] * size[1])
+        names = [names_unsplit[size[0] * i:size[0] * (i + 1)] for i in range(size[1])]
+        directions_unsplit = list(map(cls_.savefile_directions.get, [char for char in puzzle_desc if char in string.ascii_letters]))
+        directions_unsplit[last_index] = ''
+        assert(len(directions_unsplit) == size[0] * size[1])
+        directions = [directions_unsplit[size[0] * i:size[0] * (i + 1)] for i in range(size[1])]
+        # TODO: apply MOVE directives
+        return cls_(directions, names)
     def __init__(self, directions, names):
         self.size = len(directions)
         self.directions = directions
@@ -179,6 +221,16 @@ class Signpost(object):
                         self.remove_edge(edge)
                 except ValueError:
                     pass
+            for i in range(3, self.size*self.size + 1):
+                if self.changed:
+                    break
+                first_name = str(i-2)
+                middle_name = str(i-1)
+                last_name = str(i)
+                if first_name in self.all_names and last_name in self.all_names and middle_name not in self.all_names:
+                    middles = [name for name in self.all_names if (first_name, name) in self.edges and (name, last_name) in self.edges]
+                    if len(middles) == 1:
+                        self.rename_node(name, middle_name)
 
 def svg_of_digraph(dot):
     xml = dot.pipe('svg').decode('utf-8')

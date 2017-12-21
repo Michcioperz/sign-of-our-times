@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('form.html', solver=dict(names=["" for _ in range(10)], directions=["" for _ in range(10)]))
+    return render_template('form.html', solver=dict(names=["" for _ in range(10)], directions=["" for _ in range(10)]), smallest_size=4, biggest_size=7)
 
 @app.route('/analyze')
 def analyze():
